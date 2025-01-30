@@ -56,9 +56,9 @@ With the Access Control List feature, relaying can be enabled for IPv4 and
 IPv6 networks. IP ranges listed in the ACL file are allowed to send mails
 without furthur checks.
 
-* `config/relay_acl_allow`
+- `config/relay_acl_allow`
 
-    Allowed IP ranges in CIDR notation, one per line.
+  Allowed IP ranges in CIDR notation, one per line.
 
 Back in the day, ISPs enabled all of their IP space to relay. That proved
 problematic for users who took their laptops and mobile phones elsewhere and
@@ -78,7 +78,6 @@ of the corporate firewall to `config/relay_acl_allow`:
 
     echo 'N.N.N.N/32' >> /path/to/haraka/config/relay_acl_allow
 
-
 ## Force Route / Dest[ination] Domains
 
 Force routes and Destination Domains are enabled by setting in the [relay]
@@ -90,7 +89,7 @@ section of relay.ini:
 
 These two features share another common config file:
 
-* `config/relay_dest_domains.ini`
+- `config/relay_dest_domains.ini`
 
 The format is ini and entries are within the [domains] section. The key for each entry is the domain and the value is a JSON string. Within the JSON string, the currently supported keys are:
 
@@ -99,7 +98,7 @@ The format is ini and entries are within the [domains] section. The key for each
 
 ### Force Route
 
-Think of force route as the equivalent of the transport map in Postfix or the smtproutes file in Qmail. Rather than looking up the MX for a host, the *nexthop* value from the entry in the config file is used.
+Think of force route as the equivalent of the transport map in Postfix or the smtproutes file in Qmail. Rather than looking up the MX for a host, the _nexthop_ value from the entry in the config file is used.
 
 The value of "nexthop": can be a hostname or an IP, optionally follow by :port.
 
@@ -121,7 +120,7 @@ Example:
     [domains]
     test.com = { "action": "accept" }
 
-Think of *accept* as the equivalent of qmail's *rcpthosts*, or a misplaced Haraka `rcpt_to.*` plugin. The *accept* mechanism is another way to tell Haraka that a particular domain is one we accept mail for. The difference between this and the [rcpt_to.in_host_list](http://haraka.github.io/plugins/rcpt_to.in_host_list) plugin is that this one also enables relaying.
+Think of _accept_ as the equivalent of qmail's _rcpthosts_, or a misplaced Haraka `rcpt_to.*` plugin. The _accept_ mechanism is another way to tell Haraka that a particular domain is one we accept mail for. The difference between this and the [rcpt_to.in_host_list](http://haraka.github.io/plugins/rcpt_to.in_host_list) plugin is that this one also enables relaying.
 
     * continue (mails are subject to further checks)
 
@@ -130,7 +129,7 @@ Example:
     [domains]
     test.com = { "action": "continue" }
 
-Because the default behavior of Dest Routes is to deny, the *continue* option provides an escape, permitting another Haraka plugin to validate the recipient. Like the *accept* option, it too enables relaying.
+Because the default behavior of Dest Routes is to deny, the _continue_ option provides an escape, permitting another Haraka plugin to validate the recipient. Like the _accept_ option, it too enables relaying.
 
     * deny    (mails are rejected)
 
@@ -138,7 +137,6 @@ This deny option baffles me. The default behavior of Haraka is to reject emails 
 which a recipient validation plugin hasn't vouched. Adding it here prevents
 any subsequent recipient validation plugin from getting a chance. It also
 necessitates the continue option.
-
 
 ## all
 
@@ -160,6 +158,7 @@ This is BAD. Hence the big letters. In short: DO NOT USE THIS FEATURE.
 It is useful for testing and spamtraps, hence its presence.
 
 <!-- leave these buried at the bottom of the document -->
+
 [ci-img]: https://github.com/haraka/haraka-plugin-relay/actions/workflows/ci.yml/badge.svg
 [ci-url]: https://github.com/haraka/haraka-plugin-relay/actions/workflows/ci.yml
 [clim-img]: https://codeclimate.com/github/haraka/haraka-plugin-relay/badges/gpa.svg

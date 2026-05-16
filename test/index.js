@@ -1,4 +1,5 @@
 const assert = require('node:assert/strict')
+const { describe, it, beforeEach } = require('node:test')
 
 const fixtures = require('haraka-test-fixtures')
 

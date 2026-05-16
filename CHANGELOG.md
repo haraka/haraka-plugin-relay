@@ -4,6 +4,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Unreleased
 
+### [1.0.2] - 2026-05-15
+
+- deps(all): bump versions
+- test: remove done callbacks in async tests #3
+- test: runner is now node:test
+
 ### [1.0.1] - 2025-01-26
 
 - style: move prettier config into package.json
@@ -14,3 +20,4 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 [1.0.0]: https://github.com/haraka/haraka-plugin-relay/releases/tag/v1.0.0
 [1.0.1]: https://github.com/haraka/haraka-plugin-relay/releases/tag/v1.0.1
+[1.0.2]: https://github.com/haraka/haraka-plugin-relay/releases/tag/v1.0.2

@@ -7,8 +7,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 ### [1.0.2] - 2026-05-15
 
 - deps(all): bump versions
-- test: remove done callbacks in async tests #3
 - test: runner is now node:test
+- test: fix for testing registered hooks
+- test: remove done callbacks in async tests #3
 
 ### [1.0.1] - 2025-01-26
 

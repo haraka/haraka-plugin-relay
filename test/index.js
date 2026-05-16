@@ -20,7 +20,7 @@ describe('relay', () => {
 
     it('register function should call register_hook()', () => {
       this.plugin.register()
-      assert.ok(this.plugin.register_hook.called)
+      assert.ok(this.plugin.hooks.connect)
     })
   })
 
@@ -380,8 +380,7 @@ describe('relay', () => {
       this.plugin.register()
       this.plugin.cfg.relay.all = true
       this.plugin.register_hook('rcpt', 'all') // register() doesn't b/c config is disabled
-      // console.log(this.plugin.register_hook.args);
-      assert.equal(this.plugin.register_hook.args[3][1], 'all')
+      assert.equal(this.plugin.hooks.rcpt[0], 'all')
     })
 
     it('all hook always returns OK', async () => {

@@ -63,14 +63,26 @@ exports.load_acls = function () {
     this.load_acls()
   })
 
-  for (let i = 0; i < this.acl_allow.length; i++) {
-    const cidr = this.acl_allow[i].split('/')
+  for (let i = this.acl_allow.length - 1; i >= 0; i--) {
+    // Strip inline comments (e.g. "8.8.8.8/32 # note" → "8.8.8.8/32")
+    const entry = this.acl_allow[i].split('#')[0].trim()
+    if (!entry) {
+      this.acl_allow.splice(i, 1)
+      continue
+    }
+
+    const cidr = entry.split('/')
     if (!net.isIP(cidr[0])) {
       this.logerror(this, `invalid entry in ${file_name}: ${cidr[0]}`)
+      this.acl_allow.splice(i, 1)
+      continue
     }
+
     if (!cidr[1]) {
       this.logerror(this, `appending missing CIDR suffix in: ${file_name}`)
       this.acl_allow[i] = `${cidr[0]}/32`
+    } else {
+      this.acl_allow[i] = entry
     }
   }
 }
@@ -115,7 +127,7 @@ exports.is_acl_allowed = function (connection) {
     connection.logdebug(this, `checking if ${ip} is in ${item}`)
     const cidr = item.split('/')
     const c_net = cidr[0]
-    const c_mask = cidr[1] || 32
+    const c_mask = parseInt(cidr[1], 10) || (net.isIPv6(c_net) ? 128 : 32)
 
     if (!net.isIP(c_net)) continue // bad config entry
     if (net.isIPv4(ip) && net.isIPv6(c_net)) continue

@@ -1,4 +1,5 @@
 const assert = require('node:assert/strict')
+const { describe, it, beforeEach } = require('node:test')
 
 const fixtures = require('haraka-test-fixtures')
 
@@ -19,7 +20,7 @@ describe('relay', () => {
 
     it('register function should call register_hook()', () => {
       this.plugin.register()
-      assert.ok(this.plugin.register_hook.called)
+      assert.ok(this.plugin.hooks.connect)
     })
   })
 
@@ -36,6 +37,59 @@ describe('relay', () => {
     it('relay_dest_domains.ini', () => {
       this.plugin.load_dest_domains()
       assert.ok(typeof this.plugin.dest === 'object')
+    })
+  })
+
+  describe('load_acls', () => {
+    beforeEach(_set_up)
+
+    it('strips inline comments from entries', () => {
+      this.plugin.config.get = (name) => {
+        if (name === 'relay_acl_allow')
+          return ['8.8.8.8/32 # my machine', '10.0.0.0/8']
+        return []
+      }
+      this.plugin.load_acls()
+      assert.deepEqual(this.plugin.acl_allow, ['8.8.8.8/32', '10.0.0.0/8'])
+    })
+
+    it('removes entries that become empty after comment stripping', () => {
+      this.plugin.config.get = (name) => {
+        if (name === 'relay_acl_allow')
+          return ['# whole line comment', '127.0.0.1/32']
+        return []
+      }
+      this.plugin.load_acls()
+      assert.deepEqual(this.plugin.acl_allow, ['127.0.0.1/32'])
+    })
+
+    it('removes entries with invalid IP addresses', () => {
+      this.plugin.config.get = (name) => {
+        if (name === 'relay_acl_allow') return ['not-an-ip/32', '127.0.0.1/32']
+        return []
+      }
+      this.plugin.load_acls()
+      assert.deepEqual(this.plugin.acl_allow, ['127.0.0.1/32'])
+    })
+
+    it('appends /32 for bare IPv4 entries missing a mask', () => {
+      this.plugin.config.get = (name) => {
+        if (name === 'relay_acl_allow') return ['192.168.1.1']
+        return []
+      }
+      this.plugin.load_acls()
+      assert.deepEqual(this.plugin.acl_allow, ['192.168.1.1/32'])
+    })
+
+    it('security: comment-tainted entry does not open relay for all IPs', () => {
+      // Regression for issue #1: "8.8.8.8/32 # comment" must NOT match arbitrary IPs
+      this.plugin.config.get = (name) => {
+        if (name === 'relay_acl_allow') return ['8.8.8.8/32 # my machine']
+        return []
+      }
+      this.plugin.load_acls()
+      this.connection.remote.ip = '13.37.42.42'
+      assert.equal(false, this.plugin.is_acl_allowed(this.connection))
     })
   })
 
@@ -379,8 +433,7 @@ describe('relay', () => {
       this.plugin.register()
       this.plugin.cfg.relay.all = true
       this.plugin.register_hook('rcpt', 'all') // register() doesn't b/c config is disabled
-      // console.log(this.plugin.register_hook.args);
-      assert.equal(this.plugin.register_hook.args[3][1], 'all')
+      assert.equal(this.plugin.hooks.rcpt[0], 'all')
     })
 
     it('all hook always returns OK', async () => {

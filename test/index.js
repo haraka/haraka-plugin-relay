@@ -40,6 +40,59 @@ describe('relay', () => {
     })
   })
 
+  describe('load_acls', () => {
+    beforeEach(_set_up)
+
+    it('strips inline comments from entries', () => {
+      this.plugin.config.get = (name) => {
+        if (name === 'relay_acl_allow')
+          return ['8.8.8.8/32 # my machine', '10.0.0.0/8']
+        return []
+      }
+      this.plugin.load_acls()
+      assert.deepEqual(this.plugin.acl_allow, ['8.8.8.8/32', '10.0.0.0/8'])
+    })
+
+    it('removes entries that become empty after comment stripping', () => {
+      this.plugin.config.get = (name) => {
+        if (name === 'relay_acl_allow')
+          return ['# whole line comment', '127.0.0.1/32']
+        return []
+      }
+      this.plugin.load_acls()
+      assert.deepEqual(this.plugin.acl_allow, ['127.0.0.1/32'])
+    })
+
+    it('removes entries with invalid IP addresses', () => {
+      this.plugin.config.get = (name) => {
+        if (name === 'relay_acl_allow') return ['not-an-ip/32', '127.0.0.1/32']
+        return []
+      }
+      this.plugin.load_acls()
+      assert.deepEqual(this.plugin.acl_allow, ['127.0.0.1/32'])
+    })
+
+    it('appends /32 for bare IPv4 entries missing a mask', () => {
+      this.plugin.config.get = (name) => {
+        if (name === 'relay_acl_allow') return ['192.168.1.1']
+        return []
+      }
+      this.plugin.load_acls()
+      assert.deepEqual(this.plugin.acl_allow, ['192.168.1.1/32'])
+    })
+
+    it('security: comment-tainted entry does not open relay for all IPs', () => {
+      // Regression for issue #1: "8.8.8.8/32 # comment" must NOT match arbitrary IPs
+      this.plugin.config.get = (name) => {
+        if (name === 'relay_acl_allow') return ['8.8.8.8/32 # my machine']
+        return []
+      }
+      this.plugin.load_acls()
+      this.connection.remote.ip = '13.37.42.42'
+      assert.equal(false, this.plugin.is_acl_allowed(this.connection))
+    })
+  })
+
   describe('is_acl_allowed', () => {
     beforeEach(_set_up)
 

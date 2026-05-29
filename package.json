@@ -38,7 +38,7 @@
     "ipaddr.js": "^2.4.0"
   },
   "devDependencies": {
-    "@haraka/eslint-config": "^2.0.4",
+    "@haraka/eslint-config": "^3.0.0",
     "haraka-test-fixtures": "^1.7.0"
   },
   "prettier": {

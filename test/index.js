@@ -1,12 +1,12 @@
 const assert = require('node:assert/strict')
 const { describe, it, beforeEach } = require('node:test')
 
-const fixtures = require('haraka-test-fixtures')
+const { makeConnection, makePlugin } = require('haraka-test-fixtures')
 
 const _set_up = () => {
-  this.plugin = new fixtures.plugin('relay')
+  this.plugin = makePlugin('relay', { register: false })
   this.plugin.cfg = {}
-  this.connection = fixtures.connection.createConnection()
+  this.connection = makeConnection()
 }
 
 describe('relay', () => {
@@ -132,9 +132,9 @@ describe('relay', () => {
 
   describe('acl', () => {
     beforeEach(() => {
-      this.plugin = new fixtures.plugin('relay')
+      this.plugin = makePlugin('relay', { register: false })
       this.plugin.cfg = { relay: { dest_domains: true } }
-      this.connection = fixtures.connection.createConnection()
+      this.connection = makeConnection()
     })
 
     it('relay.acl=false', async () => {
@@ -205,11 +205,10 @@ describe('relay', () => {
 
   describe('dest_domains', () => {
     beforeEach(() => {
-      this.plugin = new fixtures.plugin('relay')
+      this.plugin = makePlugin('relay', { register: false })
       this.plugin.cfg = { relay: { dest_domains: true } }
 
-      this.connection = fixtures.connection.createConnection()
-      this.connection.init_transaction()
+      this.connection = makeConnection({ withTxn: true })
     })
 
     it('relay.dest_domains=false', async () => {
@@ -336,12 +335,11 @@ describe('relay', () => {
 
   describe('force_routing', () => {
     beforeEach(() => {
-      this.plugin = new fixtures.plugin('relay')
+      this.plugin = makePlugin('relay', { register: false })
       this.plugin.cfg = { relay: { force_routing: true } }
       this.plugin.dest = {}
 
-      this.connection = fixtures.connection.createConnection()
-      this.connection.init_transaction()
+      this.connection = makeConnection({ withTxn: true })
     })
 
     it('relay.force_routing=false', async () => {

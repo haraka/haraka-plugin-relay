@@ -88,9 +88,7 @@ exports.load_acls = function () {
 }
 
 exports.acl = function (next, connection) {
-  if (!this.cfg.relay.acl) {
-    return next()
-  }
+  if (!this.cfg.relay.acl) return next()
 
   connection.logdebug(
     this,
@@ -109,17 +107,11 @@ exports.acl = function (next, connection) {
 
 exports.pass_relaying = (next, connection) => {
   if (connection.relaying) return next(OK)
-
   next()
 }
 
 exports.is_acl_allowed = function (connection) {
-  if (!this.acl_allow) {
-    return false
-  }
-  if (!this.acl_allow.length) {
-    return false
-  }
+  if (!this.acl_allow?.length) return false
 
   const { ip } = connection.remote
 
@@ -142,9 +134,8 @@ exports.is_acl_allowed = function (connection) {
 }
 
 exports.dest_domains = function (next, connection, params) {
-  if (!this.cfg.relay.dest_domains) {
-    return next()
-  }
+  if (!this.cfg.relay.dest_domains) return next()
+
   const { relaying, transaction } = connection ?? {}
   if (!transaction) return next()
 
@@ -173,7 +164,20 @@ exports.dest_domains = function (next, connection, params) {
     return next(DENY, 'You are not allowed to relay')
   }
 
-  const { action } = JSON.parse(dst_cfg)
+  // guard JSON parsing — a malformed entry in relay_dest_domains.ini
+  // should fail closed (deny relay) and surface a config error, not throw.
+  let parsed
+  try {
+    parsed = JSON.parse(dst_cfg)
+  } catch (err) {
+    connection.logerror(
+      this,
+      `relay_dest_domains[${dest_domain}] is not valid JSON: ${err.message}`,
+    )
+    transaction.results.add(this, { err: `relay_dest_domain(invalid_json)` })
+    return next(DENYSOFT, 'Relay config error')
+  }
+  const { action } = parsed
   connection.logdebug(this, `found config for ${dest_domain}: ${action}`)
 
   switch (action) {
@@ -199,28 +203,31 @@ exports.dest_domains = function (next, connection, params) {
 }
 
 exports.force_routing = function (next, hmail, domain) {
-  if (!this.cfg.relay.force_routing) {
-    return next()
-  }
-  if (!this.dest) {
-    return next()
-  }
-  if (!this.dest.domains) {
-    return next()
-  }
+  if (!this.cfg.relay.force_routing) return next()
+  if (!this.dest?.domains) return next()
   let route = this.dest.domains[domain]
 
   if (!route) {
     route = this.dest.domains.any
     if (!route) {
-      this.logdebug(this, `using normal MX lookup for: ${domain}`)
+      this.logdebug(this, `using MX lookup for: ${domain}`)
       return next()
     }
   }
 
-  const { nexthop } = JSON.parse(route)
+  // guard JSON parse — fall back to MX lookup
+  let nexthop
+  try {
+    ;({ nexthop } = JSON.parse(route))
+  } catch (err) {
+    this.logerror(
+      this,
+      `force_routing: invalid JSON for ${domain}: ${err.message}`,
+    )
+    return next()
+  }
   if (!nexthop) {
-    this.logdebug(this, `using normal MX lookup for: ${domain}`)
+    this.logdebug(this, `using MX lookup for: ${domain}`)
     return next()
   }
 
@@ -229,9 +236,7 @@ exports.force_routing = function (next, hmail, domain) {
 }
 
 exports.all = function (next, connection, params) {
-  if (!this.cfg.relay.all) {
-    return next()
-  }
+  if (!this.cfg.relay.all) return next()
 
   connection.loginfo(this, `confirming recipient ${params[0]}`)
   connection.relaying = true

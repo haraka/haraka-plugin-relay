@@ -1,7 +1,6 @@
-[![CI Test Status][ci-img]][ci-url]
-[![Code Climate][clim-img]][clim-url]
-
 # haraka-plugin-relay
+
+[![Test][ci-img]][ci-url] [![Cover][cov-img]][cov-url] [![Qlty][qlty-img]][qlty-url]
 
 [MTAs](http://en.wikipedia.org/wiki/Mail_transfer_agent) generally only accept mail for _local_ domains they can deliver to. In Haraka, the `rcpt_to.*` plugins usually decide which domains and/or email addresses are deliverable. By default, everything else is rejected.
 
@@ -161,5 +160,7 @@ It is useful for testing and spamtraps, hence its presence.
 
 [ci-img]: https://github.com/haraka/haraka-plugin-relay/actions/workflows/ci.yml/badge.svg
 [ci-url]: https://github.com/haraka/haraka-plugin-relay/actions/workflows/ci.yml
-[clim-img]: https://codeclimate.com/github/haraka/haraka-plugin-relay/badges/gpa.svg
-[clim-url]: https://codeclimate.com/github/haraka/haraka-plugin-relay
+[cov-img]: https://codecov.io/github/haraka/haraka-plugin-relay/coverage.svg
+[cov-url]: https://codecov.io/github/haraka/haraka-plugin-relay
+[qlty-img]: https://qlty.sh/gh/haraka/projects/haraka-plugin-relay/maintainability.svg
+[qlty-url]: https://qlty.sh/gh/haraka/projects/haraka-plugin-relay

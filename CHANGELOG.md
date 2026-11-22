@@ -4,8 +4,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Unreleased
 
-- fix: guard `JSON.parse` in dest_domains and force_routing
+### [1.0.3] - 2026-11-21
+
 - fix(dest_domains): check every recipient (#6)
+- fix: guard `JSON.parse` in dest_domains and force_routing
+- deps: bump versions
 - test: refactored against test-fixtures 1.7.0
 
 ### [1.0.2] - 2026-05-15
@@ -27,3 +30,4 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 [1.0.0]: https://github.com/haraka/haraka-plugin-relay/releases/tag/v1.0.0
 [1.0.1]: https://github.com/haraka/haraka-plugin-relay/releases/tag/v1.0.1
 [1.0.2]: https://github.com/haraka/haraka-plugin-relay/releases/tag/v1.0.2
+[1.0.3]: https://github.com/haraka/haraka-plugin-relay/releases/tag/v1.0.3

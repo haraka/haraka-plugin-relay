@@ -1,6 +1,6 @@
 {
   "name": "haraka-plugin-relay",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Haraka plugin for managing relay permissions",
   "main": "index.js",
   "files": [

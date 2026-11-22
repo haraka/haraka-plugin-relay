@@ -139,8 +139,9 @@ exports.dest_domains = function (next, connection, params) {
   const { relaying, transaction } = connection ?? {}
   if (!transaction) return next()
 
-  // Skip this if the host is already allowed to relay
-  if (relaying) {
+  // Relaying granted by ACL or AUTH skips the check. Relaying granted here
+  // for an earlier recipient must not, or any later recipient is relayed.
+  if (relaying && !transaction.notes.relay_dest_domain) {
     transaction.results.add(this, { skip: 'relay_dest_domain(relay)' })
     return next()
   }
@@ -182,17 +183,13 @@ exports.dest_domains = function (next, connection, params) {
 
   switch (action) {
     case 'accept':
-      // why enable relaying here? Returning next(OK) will allow the
-      // address to be considered 'local'. What advantage does relaying
-      // bring?
-      connection.relaying = true
-      transaction.results.add(this, { pass: 'relay_dest_domain' })
-      return next(OK)
     case 'continue':
-      // why oh why? Only reason I can think of is to enable outbound.
+      // relaying routes the message via outbound, where force_routing
+      // applies this domain's nexthop
+      transaction.notes.relay_dest_domain = true
       connection.relaying = true
       transaction.results.add(this, { pass: 'relay_dest_domain' })
-      return next(CONT) // same as next()
+      return next(action === 'accept' ? OK : CONT)
     case 'deny':
       transaction.results.add(this, { fail: 'relay_dest_domain' })
       return next(DENY, 'You are not allowed to relay')

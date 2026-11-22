@@ -5,6 +5,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 ### Unreleased
 
 - fix: guard `JSON.parse` in dest_domains and force_routing
+- fix(dest_domains): check every recipient (GHSA-r7c5-6w3r-9rfv)
 - test: refactored against test-fixtures 1.7.0
 
 ### [1.0.2] - 2026-05-15

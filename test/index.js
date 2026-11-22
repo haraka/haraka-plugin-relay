@@ -315,11 +315,11 @@ describe('relay', () => {
     })
 
     it('action=accept', async () => {
-      this.plugin.dest = { domains: { foo: '{"action":"continue"}' } }
+      this.plugin.dest = { domains: { foo: '{"action":"accept"}' } }
       await new Promise((resolve) => {
         this.plugin.dest_domains(
           (rc) => {
-            assert.equal(CONT, rc)
+            assert.equal(OK, rc)
             assert.equal(
               1,
               this.connection.transaction.results.get('relay').pass.length,
@@ -330,6 +330,56 @@ describe('relay', () => {
           [{ host: 'foo' }],
         )
       })
+    })
+  })
+
+  describe('dest_domains, multiple recipients', () => {
+    const rcpt = (plugin, connection, host) =>
+      new Promise((resolve) =>
+        plugin.dest_domains(resolve, connection, [{ host }]),
+      )
+
+    beforeEach(() => {
+      this.plugin = makePlugin('relay', { register: false })
+      this.plugin.cfg = { relay: { dest_domains: true } }
+      this.plugin.dest = {
+        domains: {
+          'accept.test': '{"action":"accept"}',
+          'continue.test': '{"action":"continue"}',
+        },
+      }
+      this.connection = makeConnection({ withTxn: true })
+    })
+
+    for (const local of ['accept.test', 'continue.test']) {
+      it(`denies an external recipient after ${local}`, async () => {
+        await rcpt(this.plugin, this.connection, local)
+        assert.equal(this.connection.relaying, true)
+        assert.equal(
+          await rcpt(this.plugin, this.connection, 'example.com'),
+          DENY,
+        )
+      })
+    }
+
+    it('checks each listed recipient', async () => {
+      assert.equal(
+        await rcpt(this.plugin, this.connection, 'continue.test'),
+        CONT,
+      )
+      assert.equal(await rcpt(this.plugin, this.connection, 'accept.test'), OK)
+      assert.equal(
+        this.connection.transaction.results.get('relay').pass.length,
+        2,
+      )
+    })
+
+    it('ACL/AUTH relaying still skips the check', async () => {
+      this.connection.relaying = true
+      assert.equal(
+        await rcpt(this.plugin, this.connection, 'example.com'),
+        undefined,
+      )
     })
   })
 

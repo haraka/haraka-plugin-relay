@@ -1,2 +1,4 @@
 .release/
 CONTRIBUTORS.md
+AGENTS.md
+.github/copilot-instructions.md

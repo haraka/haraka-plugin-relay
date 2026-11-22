@@ -112,6 +112,8 @@ Allowed destination/recipient domains. The field within the JSON value used
 by Dest Domains is "action": and the possible values are accept, continue, or
 deny.
 
+Each recipient is checked: relaying enabled for one recipient does not exempt the others. List `relay` before the `rcpt_to.*` plugins in `config/plugins`, since those accept any recipient from a local sender once relaying is enabled.
+
     * accept   (accept the mail without further checks)
 
 Example:
